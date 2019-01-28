@@ -1,0 +1,47 @@
+import { Component, OnInit } from '@angular/core';
+import { LoadingController, AlertController } from '@ionic/angular';
+import { ApiService } from '../api.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormControl, FormGroupDirective, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { Product } from '../product';
+
+@Component({
+  selector: 'app-add',
+  templateUrl: 'add.page.html',
+  styleUrls: ['add.page.scss']
+})
+export class AddPage {
+
+  productForm: FormGroup;
+  prod_name:string='';
+  prod_desc:string='';
+  prod_price:number=null;
+
+  constructor(public api: ApiService,
+    public loadingController: LoadingController,
+    public alertController: AlertController,
+    public route: ActivatedRoute,
+    public router: Router,
+    private formBuilder: FormBuilder) {
+  }
+
+  ngOnInit() {
+    this.productForm = this.formBuilder.group({
+      'prod_name' : [null, Validators.required],
+      'prod_desc' : [null, Validators.required],
+      'prod_price' : [null, [Validators.required, Validators.minLength(1), Validators.maxLength(2)]]
+     });
+  }
+onFormSubmit(form:NgForm) {
+     this.api.addProduct(form)
+      .subscribe(res => {
+          let id = res['_id'];
+          console.log(this.router);
+          this.productForm.reset()
+          this.router.navigate([ '/tabs', { outlets: { home: 'home' } } ]);
+          }, (err) => {
+          console.log(err);
+     });
+  }
+
+}
